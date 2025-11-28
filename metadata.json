@@ -1,0 +1,7 @@
+{
+  "name": "MediConnect AI",
+  "description": "Real-time hospital bed availability tracking and vaccination center locator powered by AI.",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
+}
