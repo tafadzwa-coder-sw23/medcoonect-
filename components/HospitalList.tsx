@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Search, MapPin, Phone, Star, AlertTriangle, Syringe, BedDouble, Filter } from 'lucide-react';
+import React, { useState } from 'react';
+import { Search, MapPin, Phone, Star, AlertTriangle, Filter } from 'lucide-react';
 import { Hospital, BedType } from '../types';
 import { MOCK_HOSPITALS } from '../services/mockData';
 import { generateLocalHospitals } from '../services/geminiService';
@@ -25,14 +25,12 @@ const HospitalList: React.FC = () => {
 
     setLoading(true);
     
-    // If API KEY is present, try to generate realistic data for the location
     if (process.env.API_KEY) {
       const generated = await generateLocalHospitals(searchTerm);
       if (generated.length > 0) {
         setHospitals(generated);
         setAiGenerated(true);
       } else {
-        // Fallback to filtering mock data
         const filtered = MOCK_HOSPITALS.filter(h => 
           h.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
           h.address.toLowerCase().includes(searchTerm.toLowerCase())
@@ -41,7 +39,6 @@ const HospitalList: React.FC = () => {
         setAiGenerated(false);
       }
     } else {
-      // Offline mode filtering
       const filtered = MOCK_HOSPITALS.filter(h => 
         h.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
         h.address.toLowerCase().includes(searchTerm.toLowerCase())
@@ -68,8 +65,8 @@ const HospitalList: React.FC = () => {
     <div className="space-y-6">
       {/* Header Section */}
       <div className="bg-white rounded-xl shadow-sm p-6 border border-slate-100">
-        <h1 className="text-2xl font-bold text-slate-800 mb-2">Find Hospital Beds</h1>
-        <p className="text-slate-500 mb-6">Enter your location to find nearby hospitals with real-time bed availability.</p>
+        <h1 className="text-2xl font-bold text-slate-800 mb-2">Find Healthcare Facilities</h1>
+        <p className="text-slate-500 mb-6">Locate nearby hospitals and check bed availability in Zimbabwe.</p>
         
         <form onSubmit={handleSearch} className="flex gap-2">
           <div className="relative flex-grow">
@@ -79,7 +76,7 @@ const HospitalList: React.FC = () => {
             <input
               type="text"
               className="block w-full pl-10 pr-3 py-3 border border-slate-300 rounded-lg leading-5 bg-white placeholder-slate-500 focus:outline-none focus:placeholder-slate-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-              placeholder="Enter city, zip, or area (e.g., 'New York', 'Downtown')"
+              placeholder="Search city or hospital (e.g. 'Harare', 'Mpilo')"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -97,7 +94,7 @@ const HospitalList: React.FC = () => {
         <div className="mt-6">
             <div className="flex items-center gap-2 mb-3">
                 <Filter className="w-4 h-4 text-slate-400" />
-                <span className="text-sm font-medium text-slate-700">Filter by Bed Type:</span>
+                <span className="text-sm font-medium text-slate-700">Filter by Ward:</span>
             </div>
             <div className="flex flex-wrap gap-2">
                 <button
@@ -108,7 +105,7 @@ const HospitalList: React.FC = () => {
                         : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 hover:border-slate-300'
                     }`}
                 >
-                    All Types
+                    All Wards
                 </button>
                 {Object.values(BedType).map(type => (
                     <button
@@ -142,8 +139,8 @@ const HospitalList: React.FC = () => {
               <div className="flex justify-between items-start">
                 <h3 className="text-lg font-bold text-slate-900 line-clamp-1">{hospital.name}</h3>
                 {hospital.isCovidCenter && (
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                    COVID Center
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-600 border border-slate-200">
+                    24/7 EMERGENCY
                   </span>
                 )}
               </div>
@@ -176,7 +173,7 @@ const HospitalList: React.FC = () => {
                         <div className="text-xs text-slate-400">${bed.pricePerDay}/day</div>
                       </div>
                     </div>
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2">
                       <div className={`text-sm font-bold ${bed.available < 5 ? 'text-red-600' : 'text-green-600'}`}>
                         {bed.available} / {bed.total}
                       </div>
@@ -200,13 +197,13 @@ const HospitalList: React.FC = () => {
             <div className="bg-slate-50 px-5 py-4 border-t border-slate-100 flex gap-2">
               <button 
                 onClick={() => handleBook(hospital)}
-                className="flex-1 inline-flex justify-center items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none"
+                className="flex-1 inline-flex justify-center items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-lg text-white bg-slate-800 hover:bg-slate-900 focus:outline-none transition-colors"
               >
-                Book Bed
+                Admission Request
               </button>
               <a 
                 href={`tel:${hospital.phone}`}
-                className="inline-flex justify-center items-center px-4 py-2 border border-slate-300 shadow-sm text-sm font-medium rounded-md text-slate-700 bg-white hover:bg-slate-50 focus:outline-none"
+                className="inline-flex justify-center items-center px-4 py-2 border border-slate-300 shadow-sm text-sm font-medium rounded-lg text-slate-700 bg-white hover:bg-slate-50 focus:outline-none"
               >
                 <Phone className="h-4 w-4" />
               </a>
@@ -218,14 +215,15 @@ const HospitalList: React.FC = () => {
       {filteredHospitals.length === 0 && (
         <div className="text-center py-12">
            <AlertTriangle className="mx-auto h-12 w-12 text-slate-300" />
-           <h3 className="mt-2 text-sm font-medium text-slate-900">No hospitals found</h3>
-           <p className="mt-1 text-sm text-slate-500">Try adjusting your search or filters.</p>
+           <h3 className="mt-2 text-sm font-medium text-slate-900">No facilities found</h3>
+           <p className="mt-1 text-sm text-slate-500">Try searching for a major city like 'Harare'.</p>
         </div>
       )}
 
       {selectedHospital && (
         <BookingModal 
-          hospital={selectedHospital}
+          type="BED"
+          data={selectedHospital}
           selectedBedType={selectedBedType}
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}

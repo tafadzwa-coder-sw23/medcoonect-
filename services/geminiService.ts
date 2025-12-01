@@ -18,12 +18,12 @@ export const chatWithMedicalAssistant = async (
     const chat = ai.chats.create({
       model: 'gemini-2.5-flash',
       config: {
-        systemInstruction: `You are MedBot, a helpful medical assistant for the MediConnect platform. 
-        Your goal is to assist patients in finding hospital beds, vaccination centers, and providing basic health guidance.
+        systemInstruction: `You are MedBot, a helpful medical assistant for the MediConnect Zimbabwe platform. 
+        Your goal is to assist patients in finding hospital beds, doctors, and vaccination centers in Zimbabwe.
+        - Context: You are serving patients in Zimbabwe (Cities: Harare, Bulawayo, Mutare, Gweru, etc.).
+        - Currency: USD is commonly used.
+        - Emergency: Advise calling 999 or 994 for ambulances in Zimbabwe.
         - You are polite, empathetic, and efficient.
-        - If a user asks for emergency help, emphasize they should call emergency services (like 911) immediately if critical.
-        - You can explain medical terms related to COVID-19 and hospital wards (ICU, Oxygen).
-        - Keep responses concise and easy to read.
         - Do not provide definitive medical diagnoses.`,
       },
       history: history.map(h => ({
@@ -47,7 +47,8 @@ export const generateLocalHospitals = async (locationName: string): Promise<Hosp
   try {
     const response = await ai.models.generateContent({
       model: 'gemini-2.5-flash',
-      contents: `Generate a list of 5 fictional but realistic hospitals located in or near ${locationName}. 
+      contents: `Generate a list of 5 fictional but realistic hospitals located in or near ${locationName}, Zimbabwe. 
+      If the location is not in Zimbabwe, still generate valid hospitals for that location.
       Include a mix of bed availabilities.`,
       config: {
         responseMimeType: "application/json",
@@ -68,7 +69,7 @@ export const generateLocalHospitals = async (locationName: string): Promise<Hosp
                 items: {
                   type: Type.OBJECT,
                   properties: {
-                    type: { type: Type.STRING, enum: ['ICU', 'General', 'Oxygen', 'Ventilator'] },
+                    type: { type: Type.STRING, enum: ['ICU', 'General', 'Oxygen', 'Ventilator', 'Maternity', 'Pediatric'] },
                     available: { type: Type.NUMBER },
                     total: { type: Type.NUMBER },
                     pricePerDay: { type: Type.NUMBER }
@@ -91,7 +92,6 @@ export const generateLocalHospitals = async (locationName: string): Promise<Hosp
     const text = response.text;
     if (!text) return [];
     
-    // Parse and transform to match our TS types exactly if needed (enums)
     const rawData = JSON.parse(text);
     return rawData.map((h: any) => ({
       ...h,

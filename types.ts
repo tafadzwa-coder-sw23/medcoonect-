@@ -2,7 +2,9 @@ export enum BedType {
   ICU = 'ICU',
   GENERAL = 'General',
   OXYGEN = 'Oxygen',
-  VENTILATOR = 'Ventilator'
+  VENTILATOR = 'Ventilator',
+  MATERNITY = 'Maternity',
+  PEDIATRIC = 'Pediatric'
 }
 
 export interface BedAvailability {
@@ -27,6 +29,19 @@ export interface Hospital {
   };
 }
 
+export interface Doctor {
+  id: string;
+  name: string;
+  specialization: string;
+  hospitalId: string;
+  hospitalName: string;
+  yearsExperience: number;
+  consultationFee: number;
+  availability: string; // e.g. "Mon-Fri 08:00 - 16:00"
+  rating: number;
+  image?: string;
+}
+
 export interface VaccinationCenter {
   id: string;
   name: string;
@@ -45,11 +60,15 @@ export interface ChatMessage {
 }
 
 export interface BookingDetails {
-  hospitalId: string;
-  hospitalName: string;
-  bedType: BedType;
+  bookingType: 'BED' | 'APPOINTMENT';
+  targetId: string; // Hospital ID or Doctor ID
+  targetName: string; // Hospital Name or Doctor Name
+  subTarget?: string; // Bed Type or null
+  appointmentDate?: string;
+  appointmentTime?: string;
   patientName: string;
   patientAge: string;
   contactNumber: string;
+  notes?: string;
   isEmergency: boolean;
 }
